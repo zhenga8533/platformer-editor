@@ -6,7 +6,7 @@ FPS = 60
 
 # game constants
 BACKGROUND = [f'assets/background/{i}.png' for i in range(1, 44)]
-BUTTONS = ["assets/test.png" for i in range(10)]
+TILES = [f'assets/tiles/{i}.png' for i in range(15)]
 TILE_SIZE = 32
 ROWS = HEIGHT // TILE_SIZE
 COLUMNS = WIDTH // TILE_SIZE

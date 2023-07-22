@@ -7,24 +7,34 @@ from util.constants import *
 
 class Editor:
     def __init__(self):
+        # pygame variables
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((WIDTH + SIDEBAR_WIDTH, HEIGHT))
         pygame.display.set_caption('Stage Editor')
 
+        # stage variables
+        self.stage = [
+            [[-1 for i in range(WIDTH // TILE_SIZE)] for j in range(HEIGHT // TILE_SIZE)]
+            for k in range(len(BACKGROUND))
+        ]
         self.level = 0
         self.background = pygame.image.load(BACKGROUND[self.level])
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
-        self.choice = 0
-
-        test = pygame.image.load("assets/test.png")
-        test = pygame.transform.scale(test, (TILE_SIZE * 2, TILE_SIZE * 2))
+        # Setup tile buttons
         self.buttons = []
-
+        self.choice = 0
+        tile = 0
         for row in range(5):
             for col in range(3):
-                tile_button = Button(WIDTH + 128*col + 32, 128*row + 32, test, 1)
-                self.buttons.append(tile_button)
+                # Load image
+                image = pygame.image.load(TILES[tile])
+                image = pygame.transform.scale(image, (TILE_SIZE * 2, TILE_SIZE * 2))
+                tile += 1
+
+                # Create button
+                button = Button(WIDTH + 128*col + 32, 128*row + 32, image, 1)
+                self.buttons.append(button)
 
     def play_step(self):
         for event in pygame.event.get():
@@ -47,6 +57,7 @@ class Editor:
 
     def draw(self):
         self.draw_background()
+        self.draw_stage()
         pygame.display.flip()
 
     # Draws background and grid
@@ -67,3 +78,10 @@ class Editor:
                 self.choice = i
         # selected button
         pygame.draw.rect(self.screen, WHITE, self.buttons[self.choice].rect, 3)
+
+    # Draw tiles onto stage
+    def draw_stage(self):
+        for y, row in enumerate(self.stage[self.level]):
+            for x, tile in enumerate(row):
+                if tile >= 0:
+                    self.screen.blit(TILES[tile], (x * TILE_SIZE, y * TILE_SIZE))
