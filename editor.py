@@ -1,5 +1,5 @@
 import pygame
-from pygame import key
+from pygame import key, mouse
 from pygame.locals import *
 from button import Button
 from util.constants import *
@@ -13,7 +13,7 @@ class Editor:
         pygame.display.set_caption('Stage Editor')
 
         # stage variables
-        self.stage = [
+        self.world = [
             [[-1 for i in range(WIDTH // TILE_SIZE)] for j in range(HEIGHT // TILE_SIZE)]
             for k in range(len(BACKGROUND))
         ]
@@ -22,6 +22,7 @@ class Editor:
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
         # Setup tile buttons
+        self.tiles = []
         self.buttons = []
         self.choice = 0
         tile = 0
@@ -29,6 +30,8 @@ class Editor:
             for col in range(3):
                 # Load image
                 image = pygame.image.load(TILES[tile])
+                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+                self.tiles.append(image)
                 image = pygame.transform.scale(image, (TILE_SIZE * 2, TILE_SIZE * 2))
                 tile += 1
 
@@ -41,17 +44,32 @@ class Editor:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            elif event.type == pygame.KEYDOWN and event.key == K_UP:
-                self.level = (self.level + 1) % 43
-                self.background = pygame.image.load(BACKGROUND[self.level]).convert_alpha()
-                self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
+            elif event.type == pygame.KEYDOWN:
+                if event.key == K_UP:
+                    self.level = (self.level + 1) % 43
+                    self.background = pygame.image.load(BACKGROUND[self.level]).convert_alpha()
+                    self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
+                elif event.key == K_DOWN:
+                    self.level = self.level - 1 if self.level != 0 else 0
+                    self.background = pygame.image.load(BACKGROUND[self.level]).convert_alpha()
+                    self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
-        # Player control
+        # Player mouse control
+        mouses = mouse.get_pressed()
+        x, y = mouse.get_pos()
+        if mouses[0]:
+            if x <= WIDTH and y <= HEIGHT:
+                self.world[self.level][y // TILE_SIZE][x // TILE_SIZE] = self.choice
+        elif mouses[2]:
+            if x <= WIDTH and y <= HEIGHT:
+                self.world[self.level][y // TILE_SIZE][x // TILE_SIZE] = -1
+        # Player keyboard control
         keys = key.get_pressed()
         if keys[K_q]:
             pygame.quit()
             quit()
 
+        # Update game
         self.draw()
         self.clock.tick(FPS)
 
@@ -81,7 +99,7 @@ class Editor:
 
     # Draw tiles onto stage
     def draw_stage(self):
-        for y, row in enumerate(self.stage[self.level]):
+        for y, row in enumerate(self.world[self.level]):
             for x, tile in enumerate(row):
-                if tile >= 0:
-                    self.screen.blit(TILES[tile], (x * TILE_SIZE, y * TILE_SIZE))
+                if tile != -1:
+                    self.screen.blit(self.tiles[tile], (x * TILE_SIZE, y * TILE_SIZE))
