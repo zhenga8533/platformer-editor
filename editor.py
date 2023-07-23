@@ -1,6 +1,8 @@
 import pygame
 from pygame import key, mouse
 from pygame.locals import *
+import csv
+import os
 from button import Button
 from util.constants import *
 
@@ -15,10 +17,10 @@ class Editor:
         # stage variables
         self.world = [
             [[-1 for i in range(WIDTH // TILE_SIZE)] for j in range(HEIGHT // TILE_SIZE)]
-            for k in range(len(BACKGROUND))
+            for k in range(len(BACKGROUNDS))
         ]
         self.level = 0
-        self.background = pygame.image.load(BACKGROUND[self.level])
+        self.background = pygame.image.load(BACKGROUNDS[self.level])
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
         # Setup tile buttons
@@ -32,26 +34,30 @@ class Editor:
                 image = pygame.image.load(TILES[tile])
                 image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
                 self.tiles.append(image)
-                image = pygame.transform.scale(image, (TILE_SIZE * 2, TILE_SIZE * 2))
                 tile += 1
 
                 # Create button
-                button = Button(WIDTH + 128*col + 32, 128*row + 32, image, 1)
+                button = Button(WIDTH + 128*col + 32, 112*row + 32, image, 2)
                 self.buttons.append(button)
 
+        self.load_button = Button(WIDTH + 32, 592, pygame.image.load("assets/buttons/load.png"), 0.8)
+        self.reset_button = Button(WIDTH + 160, 592, pygame.image.load("assets/buttons/reset.png"), 0.8)
+        self.save_button = Button(WIDTH + 288, 592, pygame.image.load("assets/buttons/save.png"), 0.8)
+
     def play_step(self):
+        # Single click player input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == K_UP:
-                    self.level = (self.level + 1) % 43
-                    self.background = pygame.image.load(BACKGROUND[self.level]).convert_alpha()
+                    self.level = (self.level + 1) % len(BACKGROUNDS)
+                    self.background = pygame.image.load(BACKGROUNDS[self.level]).convert_alpha()
                     self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
                 elif event.key == K_DOWN:
-                    self.level = self.level - 1 if self.level != 0 else 0
-                    self.background = pygame.image.load(BACKGROUND[self.level]).convert_alpha()
+                    self.level = self.level - 1 if self.level != 0 else len(BACKGROUNDS) - 1
+                    self.background = pygame.image.load(BACKGROUNDS[self.level]).convert_alpha()
                     self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
         # Player mouse control
@@ -90,12 +96,32 @@ class Editor:
         for row in range(ROWS + 1):
             pygame.draw.line(self.screen, GRAY, (0, row * TILE_SIZE), (WIDTH, row * TILE_SIZE))
 
-        # buttons grid
+        # tiles grid
         for i, button in enumerate(self.buttons):
             if button.draw(self.screen):
                 self.choice = i
-        # selected button
+        # selected tile
         pygame.draw.rect(self.screen, WHITE, self.buttons[self.choice].rect, 3)
+
+        # state buttons
+        if self.load_button.draw(self.screen):  # load level data from csv file
+            if not os.path.exists(f'data/level_{self.level}.csv'):
+                print("There is no save data!")
+            else:
+                with open(f'data/level_{self.level}.csv') as csvfile:
+                    reader = csv.reader(csvfile)
+                    for x, row in enumerate(reader):
+                        for y, tile in enumerate(row):
+                            self.world[self.level][x][y] = int(tile)
+
+        if self.reset_button.draw(self.screen):  # clears current level to base state
+            self.world[self.level] = [[-1 for i in range(WIDTH // TILE_SIZE)] for j in range(HEIGHT // TILE_SIZE)]
+
+        if self.save_button.draw(self.screen):  # save level data tp csv file
+            with open(f'data/level_{self.level}.csv', 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                for row in self.world[self.level]:
+                    writer.writerow(row)
 
     # Draw tiles onto stage
     def draw_stage(self):
