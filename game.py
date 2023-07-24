@@ -3,6 +3,7 @@ from pygame import key
 from pygame.locals import *
 import csv
 import os
+from player import Player
 from util.tile import Tile
 from util.constants import *
 
@@ -41,12 +42,16 @@ class Game:
                 self.tiles.append(image)
                 tile += 1
 
-        # stage tiles
+        # load player and tiles into sprites
         self.sprites = None
+        self.player = Player()
         self.update_stage()
 
     def update_stage(self):
         self.sprites = pygame.sprite.Group()
+
+        self.sprites.add(self.player)
+
         for y, row in enumerate(self.world[self.level]):
             for x, tile in enumerate(row):
                 if tile != -1:
@@ -63,10 +68,8 @@ class Game:
                     pygame.quit()
                     quit()
 
-        # Player keyboard control
-        keys = key.get_pressed()
-        if keys[K_SPACE]:
-            pass
+        # Update player
+        self.player.update(key.get_pressed())
 
         # Update game
         self.draw()

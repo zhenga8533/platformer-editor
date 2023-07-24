@@ -11,6 +11,10 @@ TILE_SIZE = 32
 ROWS = HEIGHT // TILE_SIZE
 COLUMNS = WIDTH // TILE_SIZE
 
+# player constants
+PLAYER_SPRITES = ["fall", "fallen", "idle", "jump", "oof", "run0", "run1", "run2", "squat"]
+SPEED = 3
+
 # colors rgb
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
