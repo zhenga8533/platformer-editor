@@ -3,7 +3,7 @@ from pygame import key, mouse
 from pygame.locals import *
 import csv
 import os
-from button import Button
+from platformer_editor.util.button import Button
 from util.constants import *
 
 

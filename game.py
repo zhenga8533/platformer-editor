@@ -3,6 +3,7 @@ from pygame import key
 from pygame.locals import *
 import csv
 import os
+from util.tile import Tile
 from util.constants import *
 
 
@@ -11,9 +12,9 @@ class Game:
         # pygame variables
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        pygame.display.set_caption('Stage Editor')
+        pygame.display.set_caption('Fall Peasant')
 
-        # load levels
+        # load all levels
         self.world = [
             [[-1 for i in range(WIDTH // TILE_SIZE)] for j in range(HEIGHT // TILE_SIZE)]
             for k in range(len(BACKGROUNDS))
@@ -39,6 +40,17 @@ class Game:
                 image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
                 self.tiles.append(image)
                 tile += 1
+
+        # stage tiles
+        self.sprites = None
+        self.update_stage()
+
+    def update_stage(self):
+        self.sprites = pygame.sprite.Group()
+        for y, row in enumerate(self.world[self.level]):
+            for x, tile in enumerate(row):
+                if tile != -1:
+                    self.sprites.add(Tile(x * TILE_SIZE, y * TILE_SIZE, self.tiles[tile]))
 
     def play_step(self):
         # Single click player input
@@ -73,7 +85,4 @@ class Game:
 
     # Draw tiles onto stage
     def draw_stage(self):
-        for y, row in enumerate(self.world[self.level]):
-            for x, tile in enumerate(row):
-                if tile != -1:
-                    self.screen.blit(self.tiles[tile], (x * TILE_SIZE, y * TILE_SIZE))
+        self.sprites.draw(self.screen)
