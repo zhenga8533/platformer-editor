@@ -1,12 +1,13 @@
 import pygame
 from editor import Editor
+from game import Game
 
 # pygame variables
 pygame.init()
 
 
 if __name__ == "__main__":
-    editor = Editor()
+    game = Game()
 
     while True:
-        editor.play_step()
+        game.play_step()
