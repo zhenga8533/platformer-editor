@@ -66,6 +66,9 @@ class Game:
                 if event.key == K_q:
                     pygame.quit()
                     quit()
+            elif event.type == pygame.KEYUP:
+                if event.key == K_SPACE:
+                    self.player.jump()
 
         # Update player
         self.player.update(key.get_pressed(), self.tile_sprites)
