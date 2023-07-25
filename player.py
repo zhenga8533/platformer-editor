@@ -11,6 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.y = 550
         self.y_velocity = GRAVITY
         self.jump_charge = 0
+        self.jump_direction = 0
 
         # load sprites
         self.sprites = {}
@@ -33,13 +34,18 @@ class Player(pygame.sprite.Sprite):
         self.update_image()
 
     def jump(self):
-        self.y_velocity = min(self.jump_charge, 20)
+        self.jump_charge = min(self.jump_charge, -2 * TERMINAL_VELOCITY)
+        self.x_velocity = self.jump_direction * self.jump_charge / 3
+        self.y_velocity = self.jump_charge
         self.jump_charge = 0
         self.jumped = True
         self.jumping = False
 
     def update(self, keys, sprites):
-        # gravity
+        # x motion
+        self.x += self.x_velocity
+
+        # y motion
         self.y_velocity = max(self.y_velocity + GRAVITY, TERMINAL_VELOCITY)
         self.y -= self.y_velocity
         # y collision
@@ -47,7 +53,9 @@ class Player(pygame.sprite.Sprite):
         if collided and self.y_velocity < 0:
             self.y = collided.y
             self.y_velocity = GRAVITY
+            self.x_velocity = 0
             self.jumped = False
+            self.jump_direction = 0
 
         # player control keys
         if keys[K_SPACE]:
@@ -56,13 +64,21 @@ class Player(pygame.sprite.Sprite):
 
         if not self.jumped:
             if keys[K_d]:
-                self.x += SPEED
-                self.running = True
                 self.direction = True
+                if not self.jumping:
+                    self.x += SPEED
+                    self.running = True
+                    self.jump_direction = 0
+                else:
+                    self.jump_direction = 1
             elif keys[K_a]:
-                self.x -= SPEED
-                self.running = True
                 self.direction = False
+                if not self.jumping:
+                    self.x -= SPEED
+                    self.running = True
+                    self.jump_direction = 0
+                else:
+                    self.jump_direction = -1
             else:
                 self.running = False
 
