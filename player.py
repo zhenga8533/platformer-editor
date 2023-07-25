@@ -21,7 +21,6 @@ class Player(pygame.sprite.Sprite):
             self.sprites[player_sprite] = sprite
         self.frame = "idle"
         self.run = 0
-        self.fall = True
         self.direction = True
         self.image = None
         self.rect = None
@@ -29,19 +28,24 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, keys, sprites):
         # gravity
-        if self.fall:
-            self.y_velocity += GRAVITY
-            self.y -= self.y_velocity
-        if pygame.sprite.spritecollideany(self, sprites):
-            self.y += self.y_velocity
+        self.y_velocity = max(self.y_velocity + GRAVITY, TERMINAL_VELOCITY)
+        self.y -= self.y_velocity
+
+        # y collision
+        collided = pygame.sprite.spritecollideany(self, sprites)
+        if collided:
+            self.y = collided.y
             self.y_velocity = GRAVITY
-            self.fall = False
 
         # keys + animation
+        for event in pygame.event.get():
+            if event.type == pygame.KEYUP:
+                if event.key == K_SPACE:
+                    self.y_velocity = self.charge
+
         if keys[K_SPACE]:
             self.y_velocity = 15
-            self.fall = True
-        if keys[K_d]:
+        elif keys[K_d]:
             self.x += SPEED
             self.running = True
             self.direction = True

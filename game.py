@@ -28,8 +28,7 @@ class Game:
                         for y, tile in enumerate(row):
                             self.world[level][x][y] = int(tile)
         self.level = 0
-        self.background = pygame.image.load(BACKGROUNDS[self.level])
-        self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
+        self.background = None
 
         # Setup tile buttons
         self.tiles = []
@@ -48,8 +47,10 @@ class Game:
         self.update_stage()
 
     def update_stage(self):
-        self.tile_sprites = pygame.sprite.Group()
+        self.background = pygame.image.load(BACKGROUNDS[self.level])
+        self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
 
+        self.tile_sprites = pygame.sprite.Group()
         for y, row in enumerate(self.world[self.level]):
             for x, tile in enumerate(row):
                 if tile != -1:
@@ -68,6 +69,18 @@ class Game:
 
         # Update player
         self.player.update(key.get_pressed(), self.tile_sprites)
+
+        # Update level
+        if self.player.y < 0:
+            self.level += 1
+            self.player.y = HEIGHT
+            self.player.update_image()
+            self.update_stage()
+        elif self.player.y > HEIGHT:
+            self.level -= 1
+            self.player.y = 0
+            self.player.update_image()
+            self.update_stage()
 
         # Update game
         self.draw()

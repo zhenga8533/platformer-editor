@@ -14,7 +14,8 @@ COLUMNS = WIDTH // TILE_SIZE
 # player constants
 PLAYER_SPRITES = ["fall", "fallen", "idle", "jump", "oof", "run0", "run1", "run2", "squat"]
 SPEED = 3
-GRAVITY = -1
+GRAVITY = -0.5
+TERMINAL_VELOCITY = -10
 
 # colors rgb
 WHITE = (255, 255, 255)
