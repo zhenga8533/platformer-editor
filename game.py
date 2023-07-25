@@ -43,19 +43,17 @@ class Game:
                 tile += 1
 
         # load player and tiles into sprites
-        self.sprites = None
+        self.tile_sprites = None
         self.player = Player()
         self.update_stage()
 
     def update_stage(self):
-        self.sprites = pygame.sprite.Group()
-
-        self.sprites.add(self.player)
+        self.tile_sprites = pygame.sprite.Group()
 
         for y, row in enumerate(self.world[self.level]):
             for x, tile in enumerate(row):
                 if tile != -1:
-                    self.sprites.add(Tile(x * TILE_SIZE, y * TILE_SIZE, self.tiles[tile]))
+                    self.tile_sprites.add(Tile(x * TILE_SIZE, y * TILE_SIZE, self.tiles[tile]))
 
     def play_step(self):
         # Single click player input
@@ -69,7 +67,7 @@ class Game:
                     quit()
 
         # Update player
-        self.player.update(key.get_pressed())
+        self.player.update(key.get_pressed(), self.tile_sprites)
 
         # Update game
         self.draw()
@@ -77,6 +75,7 @@ class Game:
 
     def draw(self):
         self.draw_background()
+        self.screen.blit(self.player.image, self.player.rect)
         self.draw_stage()
         pygame.display.flip()
 
@@ -88,4 +87,4 @@ class Game:
 
     # Draw tiles onto stage
     def draw_stage(self):
-        self.sprites.draw(self.screen)
+        self.tile_sprites.draw(self.screen)
