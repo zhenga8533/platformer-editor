@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
         self.sprites = {}
         for player_sprite in PLAYER_SPRITES:
             sprite = pygame.image.load(f'assets/player/{player_sprite}.png').convert_alpha()
-            sprite = pygame.transform.scale(sprite, (TILE_SIZE * 5, TILE_SIZE * 5))
+            sprite = pygame.transform.scale(sprite, (PLAYER_SIZE[0], PLAYER_SIZE[1]))
             self.sprites[player_sprite] = sprite
         # frame control
         self.frame = "idle"
@@ -26,9 +26,25 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = None
         self.rect = self.sprites["idle"].get_rect(bottomleft=(375, 375))
+        self.hitbox_diff = (2/3, 3/4)
+        self.hitbox = pygame.Rect(self.rect.x, self.rect.y,
+                                  PLAYER_SIZE[0] * self.hitbox_diff[0], PLAYER_SIZE[1] * self.hitbox_diff[1])
         self.update_image()
 
+    def check_collide(self, sprites):
+        self.hitbox.x = self.rect.x + PLAYER_SIZE[0] / 6
+        self.hitbox.y = self.rect.y + PLAYER_SIZE[1] / 4
+        collided = pygame.sprite.spritecollide(self, sprites, False)
+
+        for collide in collided:
+            if self.hitbox.colliderect(collide.rect):
+                return collide
+
+        return None
+
     def jump(self):
+        if self.frame != "squat":
+            return
         self.jump_charge = min(self.jump_charge, -1.8 * TERMINAL_VELOCITY)
         self.velocity[0] = self.jump_direction * self.jump_charge / 3
         self.velocity[1] = self.jump_charge
@@ -51,8 +67,8 @@ class Player(pygame.sprite.Sprite):
         self.velocity[1] = max(self.velocity[1] + GRAVITY, TERMINAL_VELOCITY)
         self.rect.y -= self.velocity[1]
         # y collision
-        collided = pygame.sprite.spritecollideany(self, sprites)
-        if collided:
+        collided = self.check_collide(sprites)
+        if self.check_collide(sprites):
             if self.velocity[1] < 0:
                 self.rect.bottom = collided.rect.top
                 self.velocity[1] = GRAVITY

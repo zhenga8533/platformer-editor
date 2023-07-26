@@ -92,6 +92,7 @@ class Game:
     def draw(self):
         self.draw_background()
         self.screen.blit(self.player.image, self.player.rect)
+        pygame.draw.rect(self.screen, WHITE, self.player.hitbox, 1)
         self.draw_stage()
         pygame.display.flip()
 
