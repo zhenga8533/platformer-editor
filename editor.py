@@ -32,12 +32,12 @@ class Editor:
             for col in range(3):
                 # Load image
                 image = pygame.image.load(TILES[tile])
-                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-                self.tiles.append(image)
+                image = pygame.transform.scale(image, (TILE_SIZE * 4, TILE_SIZE * 4))
+                self.tiles.append(pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE)))
                 tile += 1
 
                 # Create button
-                button = Button(WIDTH + 128*col + 32, 112*row + 32, image, 2)
+                button = Button(WIDTH + 128*col + 32, 112*row + 32, image, 1)
                 self.buttons.append(button)
 
         self.load_button = Button(WIDTH + 32, 592, pygame.image.load("assets/buttons/load.png"), 0.8)

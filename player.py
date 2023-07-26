@@ -14,15 +14,13 @@ class Player(pygame.sprite.Sprite):
         self.sprites = {}
         for player_sprite in PLAYER_SPRITES:
             sprite = pygame.image.load(f'assets/player/{player_sprite}.png').convert_alpha()
-            sprite = pygame.transform.scale(sprite, (TILE_SIZE * 2.5, TILE_SIZE * 2.5))
+            sprite = pygame.transform.scale(sprite, (TILE_SIZE * 5, TILE_SIZE * 5))
             self.sprites[player_sprite] = sprite
         # frame control
         self.frame = "idle"
         self.direction = False
         self.run = 0
         self.running = False
-        self.jumping = False
-        self.jumped = False
 
         # sprite variables
         super().__init__()
@@ -31,14 +29,24 @@ class Player(pygame.sprite.Sprite):
         self.update_image()
 
     def jump(self):
-        self.jump_charge = min(self.jump_charge, -2 * TERMINAL_VELOCITY)
+        self.jump_charge = min(self.jump_charge, -1.8 * TERMINAL_VELOCITY)
         self.velocity[0] = self.jump_direction * self.jump_charge / 3
         self.velocity[1] = self.jump_charge
         self.jump_charge = 0
-        self.jumped = True
-        self.jumping = False
+        self.frame = "jump"
 
     def update(self, keys, sprites):
+        # x motion
+        self.rect.x += self.velocity[0]
+        if self.rect.left < 16:
+            self.rect.left = 16
+            self.velocity[0] = -self.velocity[0] * 0.5
+            self.frame = "oof"
+        elif self.rect.right > WIDTH - 16:
+            self.rect.right = WIDTH - 16
+            self.velocity[0] = -self.velocity[0] * 0.5
+            self.frame = "oof"
+
         # y motion
         self.velocity[1] = max(self.velocity[1] + GRAVITY, TERMINAL_VELOCITY)
         self.rect.y -= self.velocity[1]
@@ -49,50 +57,39 @@ class Player(pygame.sprite.Sprite):
                 self.rect.bottom = collided.rect.top
                 self.velocity[1] = GRAVITY
                 self.velocity[0] = 0
-                self.jumped = False
                 self.jump_direction = 0
+                self.frame = "idle"
             else:
                 self.rect.top = collided.rect.bottom
                 self.velocity[1] = GRAVITY
-
-        # x motion
-        self.rect.x += self.velocity[0]
+                self.frame = "oof"
 
         # player control keys
-        if keys[K_SPACE]:
+        if keys[K_SPACE] and self.frame != "jump":
             self.jump_charge += 1
-            self.jumping = True
+            self.frame = "squat"
 
-        if not self.jumped:
+        self.running = False
+        if self.frame != "jump" and self.frame != "fall" and self.frame != "oof":
             if keys[K_d]:
                 self.direction = True
-                if not self.jumping:
+                if self.frame != "squat":
                     self.rect.x += SPEED
                     self.running = True
-                    self.jump_direction = 0
                 else:
                     self.jump_direction = 1
             elif keys[K_a]:
                 self.direction = False
-                if not self.jumping:
+                if self.frame != "squat":
                     self.rect.x -= SPEED
                     self.running = True
-                    self.jump_direction = 0
                 else:
                     self.jump_direction = -1
-            else:
-                self.running = False
 
         # Control sprite frame
-        if self.jumped:
-            self.frame = "jump"
-        elif self.jumping:
-            self.frame = 'squat'
-        elif self.running:
+        if self.running:
             self.run = (self.run + SPEED/20) % 3
             self.frame = f'run{int(self.run)}'
-        else:
-            self.frame = "idle"
 
         self.update_image()
 
