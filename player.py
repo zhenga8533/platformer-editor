@@ -6,22 +6,19 @@ from util.constants import *
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         # player variables
-        self.x = 0
-        self.x_velocity = 0
-        self.y = 550
-        self.y_velocity = GRAVITY
+        self.velocity = [0.0, 0.0]
         self.jump_charge = 0
         self.jump_direction = 0
 
         # load sprites
         self.sprites = {}
         for player_sprite in PLAYER_SPRITES:
-            sprite = pygame.image.load(f'assets/player/{player_sprite}.png')
+            sprite = pygame.image.load(f'assets/player/{player_sprite}.png').convert_alpha()
             sprite = pygame.transform.scale(sprite, (TILE_SIZE * 2.5, TILE_SIZE * 2.5))
             self.sprites[player_sprite] = sprite
         # frame control
         self.frame = "idle"
-        self.direction = True
+        self.direction = False
         self.run = 0
         self.running = False
         self.jumping = False
@@ -30,32 +27,36 @@ class Player(pygame.sprite.Sprite):
         # sprite variables
         super().__init__()
         self.image = None
-        self.rect = None
+        self.rect = self.sprites["idle"].get_rect(bottomleft=(375, 375))
         self.update_image()
 
     def jump(self):
         self.jump_charge = min(self.jump_charge, -2 * TERMINAL_VELOCITY)
-        self.x_velocity = self.jump_direction * self.jump_charge / 3
-        self.y_velocity = self.jump_charge
+        self.velocity[0] = self.jump_direction * self.jump_charge / 3
+        self.velocity[1] = self.jump_charge
         self.jump_charge = 0
         self.jumped = True
         self.jumping = False
 
     def update(self, keys, sprites):
-        # x motion
-        self.x += self.x_velocity
-
         # y motion
-        self.y_velocity = max(self.y_velocity + GRAVITY, TERMINAL_VELOCITY)
-        self.y -= self.y_velocity
+        self.velocity[1] = max(self.velocity[1] + GRAVITY, TERMINAL_VELOCITY)
+        self.rect.y -= self.velocity[1]
         # y collision
         collided = pygame.sprite.spritecollideany(self, sprites)
-        if collided and self.y_velocity < 0:
-            self.y = collided.y
-            self.y_velocity = GRAVITY
-            self.x_velocity = 0
-            self.jumped = False
-            self.jump_direction = 0
+        if collided:
+            if self.velocity[1] < 0:
+                self.rect.bottom = collided.rect.top
+                self.velocity[1] = GRAVITY
+                self.velocity[0] = 0
+                self.jumped = False
+                self.jump_direction = 0
+            else:
+                self.rect.top = collided.rect.bottom
+                self.velocity[1] = GRAVITY
+
+        # x motion
+        self.rect.x += self.velocity[0]
 
         # player control keys
         if keys[K_SPACE]:
@@ -66,7 +67,7 @@ class Player(pygame.sprite.Sprite):
             if keys[K_d]:
                 self.direction = True
                 if not self.jumping:
-                    self.x += SPEED
+                    self.rect.x += SPEED
                     self.running = True
                     self.jump_direction = 0
                 else:
@@ -74,7 +75,7 @@ class Player(pygame.sprite.Sprite):
             elif keys[K_a]:
                 self.direction = False
                 if not self.jumping:
-                    self.x -= SPEED
+                    self.rect.x -= SPEED
                     self.running = True
                     self.jump_direction = 0
                 else:
@@ -99,5 +100,3 @@ class Player(pygame.sprite.Sprite):
         self.image = self.sprites[self.frame]
         if not self.direction:
             self.image = pygame.transform.flip(self.image, True, False)
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = [self.x, self.y]

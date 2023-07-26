@@ -74,14 +74,14 @@ class Game:
         self.player.update(key.get_pressed(), self.tile_sprites)
 
         # Update level
-        if self.player.y < 0:
+        if self.player.rect.bottom < 0:
             self.level += 1
-            self.player.y = HEIGHT
+            self.player.rect.y = HEIGHT
             self.player.update_image()
             self.update_stage()
-        elif self.player.y > HEIGHT:
+        elif self.player.rect.top > HEIGHT:
             self.level -= 1
-            self.player.y = 0
+            self.player.rect.y = 0
             self.player.update_image()
             self.update_stage()
 
