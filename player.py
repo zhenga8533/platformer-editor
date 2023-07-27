@@ -45,7 +45,7 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         if self.frame != "squat":
             return
-        self.jump_charge = min(self.jump_charge, -1.8 * TERMINAL_VELOCITY)
+        self.jump_charge = min(self.jump_charge, -1.6 * TERMINAL_VELOCITY)
         self.velocity[0] = self.jump_direction * self.jump_charge / 3
         self.velocity[1] = self.jump_charge
         self.jump_charge = 0
@@ -54,12 +54,21 @@ class Player(pygame.sprite.Sprite):
     def update(self, keys, sprites):
         # x motion
         self.rect.x += self.velocity[0]
-        if self.rect.left < 16:
-            self.rect.left = 16
+        collided = self.check_collide(sprites)
+        if collided:
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
-        elif self.rect.right > WIDTH - 16:
-            self.rect.right = WIDTH - 16
+            if self.velocity[0] < 0:
+                self.rect.right = collided.rect.left + PLAYER_SIZE[0] / 6
+            else:
+                self.rect.left = collided.rect.right - PLAYER_SIZE[0] / 6
+
+        if self.hitbox.left < 16:
+            self.rect.left = 16 - PLAYER_SIZE[0] / 6
+            self.velocity[0] = -self.velocity[0] * 0.5
+            self.frame = "oof"
+        elif self.hitbox.right > WIDTH - 16:
+            self.rect.right = WIDTH - 16 + PLAYER_SIZE[0] / 6
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
 
@@ -68,7 +77,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y -= self.velocity[1]
         # y collision
         collided = self.check_collide(sprites)
-        if self.check_collide(sprites):
+        if collided:
             if self.velocity[1] < 0:
                 self.rect.bottom = collided.rect.top
                 self.velocity[1] = GRAVITY
@@ -76,12 +85,12 @@ class Player(pygame.sprite.Sprite):
                 self.jump_direction = 0
                 self.frame = "idle"
             else:
-                self.rect.top = collided.rect.bottom
+                self.rect.top = collided.rect.bottom - PLAYER_SIZE[1] / 4
                 self.velocity[1] = GRAVITY
                 self.frame = "oof"
 
         # player control keys
-        if keys[K_SPACE] and self.frame != "jump":
+        if keys[K_SPACE] and (self.frame == "idle" or self.frame == "squat"):
             self.jump_charge += 1
             self.frame = "squat"
 
