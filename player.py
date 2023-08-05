@@ -50,6 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.velocity[1] = self.jump_charge
         self.jump_charge = 0
         self.frame = "jump"
+        jump.play()
 
     def update(self, keys, sprites):
         # x motion
@@ -59,6 +60,7 @@ class Player(pygame.sprite.Sprite):
         if collided:
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
+            bump.play()
             if self.direction:
                 self.rect.right = collided.rect.left + PLAYER_SIZE[0] / 6
             else:
@@ -68,10 +70,12 @@ class Player(pygame.sprite.Sprite):
             self.rect.left = 16 - PLAYER_SIZE[0] / 6
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
+            bump.play()
         elif self.hitbox.right > WIDTH - 16:
             self.rect.right = WIDTH - 16 + PLAYER_SIZE[0] / 6
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
+            bump.play()
 
         # y motion
         self.velocity[1] = max(self.velocity[1] + GRAVITY, TERMINAL_VELOCITY)
@@ -80,6 +84,8 @@ class Player(pygame.sprite.Sprite):
         collided = self.check_collide(sprites)
         if collided:
             if self.velocity[1] < 0:
+                if self.velocity[1] < 2 * GRAVITY:
+                    fall.play() if self.velocity[1] <= TERMINAL_VELOCITY else land.play()
                 self.frame = "fallen" if self.velocity[1] <= TERMINAL_VELOCITY or self.frame == "fallen" else "idle"
                 self.rect.bottom = collided.rect.top
                 self.velocity[1] = GRAVITY
