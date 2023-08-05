@@ -15,8 +15,8 @@ COLUMNS = WIDTH // TILE_SIZE
 PLAYER_SPRITES = ["fall", "fallen", "idle", "jump", "oof", "run0", "run1", "run2", "squat"]
 PLAYER_SIZE = (TILE_SIZE * 4, TILE_SIZE * 4.5)
 SPEED = 3
-GRAVITY = -0.4
-TERMINAL_VELOCITY = -10
+GRAVITY = -0.281
+TERMINAL_VELOCITY = -14
 
 # colors rgb
 WHITE = (255, 255, 255)

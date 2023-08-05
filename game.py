@@ -81,7 +81,7 @@ class Game:
             self.update_stage()
         elif self.player.rect.top > HEIGHT:
             self.level -= 1
-            self.player.rect.y = 0
+            self.player.rect.y = -self.player.rect.height
             self.player.update_image()
             self.update_stage()
 
@@ -91,8 +91,8 @@ class Game:
 
     def draw(self):
         self.draw_background()
-        self.screen.blit(self.player.image, self.player.rect)
         self.draw_stage()
+        self.screen.blit(self.player.image, self.player.rect)
         pygame.display.flip()
 
     # Draws background and grid

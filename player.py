@@ -45,8 +45,8 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         if self.frame != "squat":
             return
-        self.jump_charge = min(self.jump_charge, -1.6 * TERMINAL_VELOCITY)
-        self.velocity[0] = self.jump_direction * self.jump_charge / 3
+        self.jump_charge = min(self.jump_charge, -TERMINAL_VELOCITY)
+        self.velocity[0] = self.jump_direction * min(self.jump_charge, -TERMINAL_VELOCITY / 3)
         self.velocity[1] = self.jump_charge
         self.jump_charge = 0
         self.frame = "jump"
@@ -54,11 +54,12 @@ class Player(pygame.sprite.Sprite):
     def update(self, keys, sprites):
         # x motion
         self.rect.x += self.velocity[0]
+        # x collision
         collided = self.check_collide(sprites)
         if collided:
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
-            if self.velocity[0] < 0:
+            if self.direction:
                 self.rect.right = collided.rect.left + PLAYER_SIZE[0] / 6
             else:
                 self.rect.left = collided.rect.right - PLAYER_SIZE[0] / 6
@@ -79,19 +80,22 @@ class Player(pygame.sprite.Sprite):
         collided = self.check_collide(sprites)
         if collided:
             if self.velocity[1] < 0:
+                self.frame = "fallen" if self.velocity[1] <= TERMINAL_VELOCITY or self.frame == "fallen" else "idle"
                 self.rect.bottom = collided.rect.top
                 self.velocity[1] = GRAVITY
                 self.velocity[0] = 0
                 self.jump_direction = 0
-                self.frame = "idle"
             else:
                 self.rect.top = collided.rect.bottom - PLAYER_SIZE[1] / 4
                 self.velocity[1] = GRAVITY
                 self.frame = "oof"
+        if self.velocity[1] < 2 * GRAVITY and self.frame.__contains__("run"):
+            self.velocity[0] = SPEED if self.direction else -SPEED
+            self.frame = "fall"
 
         # player control keys
         if keys[K_SPACE] and (self.frame == "idle" or self.frame == "squat"):
-            self.jump_charge += 1
+            self.jump_charge += 0.75
             self.frame = "squat"
 
         self.running = False
