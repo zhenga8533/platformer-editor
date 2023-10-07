@@ -17,8 +17,9 @@ class Player(pygame.sprite.Sprite):
             sprite = pygame.transform.scale(sprite, (PLAYER_SIZE[0], PLAYER_SIZE[1]))
             self.sprites[player_sprite] = sprite
         # frame control
-        self.frame = "idle"
+        self.frame = "fall"
         self.direction = False
+        self.flipped = False
         self.run = 0
         self.running = False
 
@@ -58,24 +59,35 @@ class Player(pygame.sprite.Sprite):
         # x collision
         collided = self.check_collide(sprites)
         if collided:
+            if not self.frame.startswith("run"):
+                bump.play()
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
-            bump.play()
+
             if self.direction:
                 self.rect.right = collided.rect.left + PLAYER_SIZE[0] / 6
             else:
                 self.rect.left = collided.rect.right - PLAYER_SIZE[0] / 6
+            self.direction = not self.direction
 
+        # Check bounds
         if self.hitbox.left < 16:
+            if not self.frame.startswith("run"):
+                self.direction = not self.direction
+                self.flipped = True
+                bump.play()
             self.rect.left = 16 - PLAYER_SIZE[0] / 6
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
-            bump.play()
         elif self.hitbox.right > WIDTH - 16:
+            if not self.frame.startswith("run"):
+                self.direction = not self.direction
+                self.flipped = True
+                bump.play()
+
             self.rect.right = WIDTH - 16 + PLAYER_SIZE[0] / 6
             self.velocity[0] = -self.velocity[0] * 0.5
             self.frame = "oof"
-            bump.play()
 
         # y motion
         self.velocity[1] = max(self.velocity[1] + GRAVITY, TERMINAL_VELOCITY)
@@ -91,11 +103,17 @@ class Player(pygame.sprite.Sprite):
                 self.velocity[1] = GRAVITY
                 self.velocity[0] = 0
                 self.jump_direction = 0
+                if self.flipped:
+                    self.direction = not self.direction
+                    self.flipped = False
             else:
                 self.rect.top = collided.rect.bottom - PLAYER_SIZE[1] / 4
                 self.velocity[1] = GRAVITY
                 self.frame = "oof"
-        if self.velocity[1] < 2 * GRAVITY and self.frame.__contains__("run"):
+                self.direction = not self.direction
+                self.flipped = True
+                bump.play()
+        if self.velocity[1] < 2 * GRAVITY and self.frame.startswith("run"):
             self.velocity[0] = SPEED if self.direction else -SPEED
             self.frame = "fall"
 
