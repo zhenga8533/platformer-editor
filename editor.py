@@ -1,4 +1,3 @@
-import pygame
 from pygame import key, mouse
 from pygame.locals import *
 import csv
@@ -59,6 +58,9 @@ class Editor:
                     self.level = self.level - 1 if self.level != 0 else len(BACKGROUNDS) - 1
                     self.background = pygame.image.load(BACKGROUNDS[self.level]).convert_alpha()
                     self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
+                elif event.key == K_ESCAPE:
+                    pygame.display.set_mode((WIDTH, HEIGHT))
+                    return 0
 
         # Player mouse control
         mouses = mouse.get_pressed()
@@ -78,6 +80,7 @@ class Editor:
         # Update game
         self.draw()
         self.clock.tick(FPS)
+        return 2
 
     def draw(self):
         self.draw_background()

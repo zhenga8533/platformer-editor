@@ -8,6 +8,7 @@ SIDEBAR_WIDTH = 384
 FPS = 60
 
 # game constants
+TITLE = "assets/background/0.png"
 BACKGROUNDS = [f'assets/background/{i}.png' for i in range(1, 44)]
 TILES = [f'assets/tiles/{i}.png' for i in range(15)]
 TILE_SIZE = 16

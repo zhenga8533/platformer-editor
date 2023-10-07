@@ -1,4 +1,3 @@
-import pygame
 from pygame import key
 from pygame.locals import *
 import csv
@@ -66,6 +65,8 @@ class Game:
                 if event.key == K_q:
                     pygame.quit()
                     quit()
+                elif event.key == K_ESCAPE:
+                    return 0
             elif event.type == pygame.KEYUP:
                 if event.key == K_SPACE:
                     self.player.jump()
@@ -88,6 +89,7 @@ class Game:
         # Update game
         self.draw()
         self.clock.tick(FPS)
+        return 1
 
     def draw(self):
         self.draw_background()
