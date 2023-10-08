@@ -22,7 +22,7 @@ jump = pygame.mixer.Sound("assets/sounds/jump.mp3")
 land = pygame.mixer.Sound("assets/sounds/land.mp3")
 
 # player constants
-PLAYER_SPRITES = ["fall", "fallen", "idle", "jump", "oof", "run0", "run1", "run2", "squat"]
+PLAYER_SPRITES = ["fall", "fallen", "idle", "jump", "oof", "oofeR", "run0", "run1", "run2", "squat"]
 PLAYER_SIZE = (TILE_SIZE * 4, TILE_SIZE * 4.5)
 SPEED = 3
 GRAVITY = -0.281

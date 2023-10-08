@@ -56,3 +56,6 @@ if __name__ == "__main__":
             main.mode = game.play_step()
         elif main.mode == 2:
             main.mode = editor.play_step()
+            if main.mode == 0:
+                game.load_levels()
+                game.update_stage()

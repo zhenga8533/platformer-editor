@@ -19,7 +19,6 @@ class Player(pygame.sprite.Sprite):
         # frame control
         self.frame = "fall"
         self.direction = False
-        self.flipped = False
         self.run = 0
         self.running = False
 
@@ -33,6 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.update_image()
 
     def check_collide(self, sprites):
+        # Check collisions using pygame sprite detection
         self.hitbox.x = self.rect.x + PLAYER_SIZE[0] / 6
         self.hitbox.y = self.rect.y + PLAYER_SIZE[1] / 4
         collided = pygame.sprite.spritecollide(self, sprites, False)
@@ -74,7 +74,6 @@ class Player(pygame.sprite.Sprite):
         if self.hitbox.left < 16:
             if not self.frame.startswith("run"):
                 self.direction = not self.direction
-                self.flipped = True
                 bump.play()
             self.rect.left = 16 - PLAYER_SIZE[0] / 6
             self.velocity[0] = -self.velocity[0] * 0.5
@@ -82,7 +81,6 @@ class Player(pygame.sprite.Sprite):
         elif self.hitbox.right > WIDTH - 16:
             if not self.frame.startswith("run"):
                 self.direction = not self.direction
-                self.flipped = True
                 bump.play()
 
             self.rect.right = WIDTH - 16 + PLAYER_SIZE[0] / 6
@@ -103,15 +101,10 @@ class Player(pygame.sprite.Sprite):
                 self.velocity[1] = GRAVITY
                 self.velocity[0] = 0
                 self.jump_direction = 0
-                if self.flipped:
-                    self.direction = not self.direction
-                    self.flipped = False
             else:
                 self.rect.top = collided.rect.bottom - PLAYER_SIZE[1] / 4
                 self.velocity[1] = GRAVITY
-                self.frame = "oof"
-                self.direction = not self.direction
-                self.flipped = True
+                self.frame = "oofeR"
                 bump.play()
         if self.velocity[1] < 2 * GRAVITY and self.frame.startswith("run"):
             self.velocity[0] = SPEED if self.direction else -SPEED

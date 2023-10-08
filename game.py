@@ -15,6 +15,21 @@ class Game:
         pygame.display.set_caption('Fall Peasant')
 
         # load all levels
+        self.world = []
+        self.level = 0
+        self.background = None
+
+        # Setup tile
+        self.tiles = []
+        self.load_levels()
+
+        # load player and tiles into sprites
+        self.tile_sprites = None
+        self.player = Player()
+        self.update_stage()
+
+    def load_levels(self):
+        # levels
         self.world = [
             [[-1 for i in range(WIDTH // TILE_SIZE)] for j in range(HEIGHT // TILE_SIZE)]
             for k in range(len(BACKGROUNDS))
@@ -26,11 +41,8 @@ class Game:
                     for x, row in enumerate(reader):
                         for y, tile in enumerate(row):
                             self.world[level][x][y] = int(tile)
-        self.level = 0
-        self.background = None
 
-        # Setup tile buttons
-        self.tiles = []
+        # tiles
         tile = 0
         for row in range(5):
             for col in range(3):
@@ -39,11 +51,6 @@ class Game:
                 image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
                 self.tiles.append(image)
                 tile += 1
-
-        # load player and tiles into sprites
-        self.tile_sprites = None
-        self.player = Player()
-        self.update_stage()
 
     def update_stage(self):
         self.background = pygame.image.load(BACKGROUNDS[self.level])
